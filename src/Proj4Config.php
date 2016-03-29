@@ -265,4 +265,12 @@ class Proj4Config
         }
     }
 
+    /**
+     * @return ProjectionInterface
+     */
+    public function getProjection()
+    {
+        throw new \Exception('Not yet implemented.');
+    }
+
 }

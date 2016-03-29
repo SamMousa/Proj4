@@ -25,6 +25,7 @@ abstract class AbstractPoint implements PointInterface
 
     /**
      * The datum for this point.
+     * @var Datum
      */
      protected $datum;
 
@@ -59,6 +60,7 @@ abstract class AbstractPoint implements PointInterface
 
     /**
      * Return the datum.
+     * @return Datum
      */
     public function getDatum()
     {
