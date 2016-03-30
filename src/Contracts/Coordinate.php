@@ -39,4 +39,10 @@ interface Coordinate {
      */
     public function getH();
 
+    /**
+     * @return Ellipsoid
+     */
+    public function  getEllipsoid();
+
+
 }

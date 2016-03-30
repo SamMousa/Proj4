@@ -5,6 +5,7 @@ namespace Academe\Proj\Coordinates;
 
 
 use Academe\Proj\Contracts\Coordinate;
+use Academe\Proj\Contracts\Ellipsoid;
 use Academe\Proj\Traits\DeriveGeocentricTrait;
 use Academe\Proj\Traits\DeriveGeodeticTrait;
 
@@ -33,8 +34,9 @@ class GeocentricCoordinate extends AbstractCoordinate implements Coordinate
      * @param float $lon Longitude
      * @param float $h Height
      */
-    public function __construct($x, $y, $z)
+    public function __construct($x, $y, $z, Ellipsoid $ellipsoid)
     {
+        parent::__construct($ellipsoid);
         $this->x = $x;
         $this->y = $y;
         $this->z = $z;
