@@ -23,7 +23,7 @@ class Latlon extends AbstractProjection
      */
     protected $coord_names = [
         'lat' => ['lat', 'latitude', '0'],
-        'lon' => ['lon', 'long', 'longitude', '1'],
+        'lon' => ['lon', 'l ong', 'longitude', '1'],
         'height'  => ['height', 'h', '2'],
     ];
 

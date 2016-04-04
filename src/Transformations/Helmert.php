@@ -38,7 +38,6 @@ class Helmert
             $x, $y, $z
         );
 
-
         return new GeocentricCoordinate($x, $y, $z, $c->getEllipsoid(), $d);
     }
 

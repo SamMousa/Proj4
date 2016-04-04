@@ -65,11 +65,19 @@ for ($lon = 0; $lon <= 180; $lon ++) {
 
 }
 
-//$c = new \Academe\Proj\Coordinates\GeocentricCoordinate(236295.183 - 155000, 590755.315 - 463000, 1, $ellipsoid, $datum);
+$WGS84 = new \Academe\Proj\Ellipsoids\ARFEllipsoid(6378137, 298.257223563);
+$c = new \Academe\Proj\Coordinates\GeocentricCoordinate(81295.183, 127755.315, 1, $ellipsoid, $datum);
+$projected = \Academe\Proj\Transformations\Helmert::transform($c, new \Academe\Proj\Datum\Datum());
 
-$c =  new GeodeticCoordinate(6.60650455549, 53.2965173451, 1, $ellipsoid, new \Academe\Proj\Datum\Datum());
+echo "{$projected->getLat()}, {$projected->getLon()}\n";
 
-$c =  new \Academe\Proj\Coordinates\GeocentricCoordinate(3786461.411817, 5079283.3397545, 728854.25060513, $ellipsoid, new \Academe\Proj\Datum\Datum());
+$c =  new GeodeticCoordinate(53.2965173451, 6.60650455549, 1, $WGS84, new \Academe\Proj\Datum\Datum());
+
+$proj = new \Academe\Proj\Projection\Sterea(52.15616055555555, 0.9999079, 155000, 463000, 5.38763888888889, $datum, $ellipsoid);
+//$proj = new \Academe\Proj\Projection\Gauss(52.15616055555555, 0.9999079, 155000, 463000, 5.38763888888889, $datum, $ellipsoid);
+var_dump(array_map('rad2deg', $proj->inverse(236296.709, 590744.631)));
+die('ok');
+//$c =  new \Academe\Proj\Coordinates\GeocentricCoordinate(3786461.411817, 5079283.3397545, 728854.25060513, $ellipsoid, new \Academe\Proj\Datum\Datum());
 //$c = new GeodeticCoordinate(90, 0, 0, $ellipsoid, new \Academe\Proj\Datum\Datum());
 var_dump($ellipsoid->getEs2());
 var_dump($datum);
@@ -82,9 +90,6 @@ var_dump($c->getY());
 var_dump($c->getZ());
 die();
 $test = new GeodeticCoordinate($c->getLat(), $c->getLon(), $c->getH(), $ellipsoid, $datum);
-$projected = \Academe\Proj\Transformations\Helmert::transform($c, $datum);
-
-echo "{$projected->getLat()}, {$projected->getLon()}\n";
 die();
 
 
