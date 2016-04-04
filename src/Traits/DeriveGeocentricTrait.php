@@ -25,6 +25,10 @@ trait DeriveGeocentricTrait
 
     abstract public function getH();
 
+    /**
+     * @throws \Exception
+     * @see https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_geodetic_to_ECEF_coordinates
+     */
     private function calculateGeocentric()
     {
         // Coordinate properties.
@@ -33,50 +37,18 @@ trait DeriveGeocentricTrait
         $h = $this->getH();
 
         // Ellipsoid properties
-        // @todo Decide how to get these; while needed for conversion they are not "part" of the coordinate.
         $a = $this->getEllipsoid()->getA();
         $es = $this->getEllipsoid()->getEs();
 
-
-        /**
-         * This code is directly almost copied from: Geodetic::toGeocentric
-         */
-
-
-        /*
-         * Don't blow up if Latitude is just a little out of the value
-         * range as it may just be a rounding issue.  Also removed longitude
-         * test, it should be wrapped by cos() and sin().  NFW for PROJ.4, Sep/2001.
-         */
-
-        if ($lat < -M_PI_2 && $lat > -1.001 * M_PI_2) {
-            $lat = -M_PI_2;
-        } elseif ($lat > M_PI_2 && $lat < 1.001 * M_PI_2) {
-            $lat = M_PI_2;
-        } elseif (($lat < -M_PI_2) || ($lat > M_PI_2)) {
-            // Latitude out of range.
-            throw new Exception (sprintf('geocent:lat (%s) out of range', $lat));
-        }
-
-        if ($lon > M_PI) {
-            $lon -= (2 * M_PI);
-        }
-
-        $sin_lat = sin($lat);
-
-        $cos_lat = cos($lat);
-
-        // Square of sin(lat)
-        $Sin2_Lat = $sin_lat * $sin_lat;
-
-        // Earth radius at location
-        $Rn = $a / (sqrt(1.0e0 - $es * $Sin2_Lat));
+        $nTheta = $a / sqrt(1 - $es * sin($lat) ** 2);
 
         $this->_geocentricTrait = [
-            'x' => ($Rn + $h) * $cos_lat * cos($lon),
-            'y' => ($Rn + $h) * $cos_lat * sin($lon),
-            'z' => (($Rn * (1 - $es)) + $h) * $sin_lat,
+            'x' => ($nTheta + $h) * cos($lat) * cos($lon),
+            'y' => ($nTheta + $h) * cos($lat) * sin($lon),
+            'z' => ($nTheta * (1 - $es) + $h) * sin($lat),
         ];
+
+
 
     }
 
@@ -112,4 +84,7 @@ trait DeriveGeocentricTrait
         }
         return $this->_geocentricTrait['z'];
     }
+
+
+
 }

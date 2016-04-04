@@ -28,119 +28,44 @@ trait DeriveGeodeticTrait
 
     abstract public function getZ();
 
+    /**
+     * @see https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#The_application_of_Ferrari.27s_solution
+     */
     private function calculateGeodetic()
     {
         $x = $this->getX();
         $y = $this->getY();
         $z = $this->getZ();
-
-        // Local definitions and variables
-        // end-criterium of loop, accuracy of sin(Latitude)
-
-        $genau = 1.0E-12;
-        $genau2 = $genau * $genau;
-        $maxiter = 30;
-
-        /*
-        $P;        // distance between semi-minor axis and location
-        $RR;       // distance between center and location
-        $CT;       // sin of geocentric latitude
-        $ST;       // cos of geocentric latitude
-        $RX;
-        $RK;
-        $RN;       // Earth radius at location
-        $CPHI0;    // cos of start or old geodetic latitude in iterations
-        $SPHI0;    // sin of start or old geodetic latitude in iterations
-        $CPHI;     // cos of searched geodetic latitude
-        $SPHI;     // sin of searched geodetic latitude
-        $SDPHI;    // end-criterium: addition-theorem of sin(Latitude(iter)-Latitude(iter-1))
-        $at_pole;     // indicates location is in polar region
-        $iter;        // of continous iteration, max. 30 is always enough (s.a.)
-        $lon;
-        $lat;
-        $height;
-        */
-
         $a = $this->getEllipsoid()->getA();
         $b = $this->getEllipsoid()->getB();
-        // The eccentricity squared.
         $es = $this->getEllipsoid()->getEs();
+        $es2 = $this->getEllipsoid()->getEs2();
+
+        // Ferrari's solution.
+        $r = sqrt($x ** 2 + $y ** 2);
+        $E2 = $a ** 2 - $b ** 2;
+        $F = 54 * $b ** 2 * $z ** 2;
+        $G = $r ** 2 + (1 - $es) * $z ** 2 - $es * $E2;
+        $C = ($es ** 2 * $F * $r ** 2) / ($G ** 3);
+        $S = (1 + $C + sqrt($C ** 2 + 2 * $C)) ** (1 / 3);
+        $P = $F / (3 * ($S + 1 / $S + 1) ** 2 * $G ** 2);
+        $Q = sqrt(1 + 2 * $es ** 2 * $P);
+        $r_0 = (-1 * ($P * $es * $r) / (1 + $Q)) + sqrt(0.5 * $a ** 2 * (1 + 1 / $Q) - ($P * (1 - $es) * $z ** 2) / ($Q * (1 + $Q)) - 0.5 * $P * $r ** 2);
+        $U = sqrt(($r - $es * $r_0) ** 2 + $z ** 2);
+        $V = sqrt(($r - $es * $r_0) ** 2 + (1 - $es) * $z ** 2);
+        $Z_0 = $b ** 2 * $z / ($a * $V);
+        $h = $U * (1 - $b ** 2 / ($a * $V));
 
 
-        $at_pole = false;
-
-        // The distance from the axis passing through the poles.
-        $P = sqrt($x * $x + $y * $y);
-        $RR = sqrt($x * $x + $y * $y + $z * $z);
-
-        // Special cases for latitude and longitude.
-        if ($P / $a < $genau) {
-            // Special case: at the poles if P=0. (X=0, Y=0)
-            $at_pole = true;
-            $lon = 0.0;
-
-            // If (X,Y,Z)=(0,0,0) then Height becomes semi-minor axis
-            // of ellipsoid (=center of mass) and Latitude becomes PI/2
-
-            if ($RR / $a < $genau) {
-                $lat = M_PI_2;
-                $height = -$b;
-                return;
-            }
-        } else {
-            // Ellipsoidal (geodetic) longitude interval:
-            // -PI < Longitude <= +PI
-            $lon = atan2($y, $x);
-        }
-
-
-        /* --------------------------------------------------------------
-         * Following iterative algorithm was developped by
-         * "Institut für Erdmessung", University of Hannover, July 1988.
-         * Internet: www.ife.uni-hannover.de
-         * Iterative computation of CPHI,SPHI and Height.
-         * Iteration of CPHI and SPHI to 10**-12 radian res$p->
-         * 2*10**-7 arcsec.
-         * --------------------------------------------------------------
-         */
-
-        $CT = $z / $RR;
-        $ST = $P / $RR;
-        $RX = 1.0 / sqrt(1.0 - $es * (2.0 - $es) * $ST * $ST);
-        $CPHI0 = $ST * (1.0 - $es) * $RX;
-        $SPHI0 = $CT * $RX;
-        $iter = 0;
-
-        // Loop to find sin(Latitude) res $p-> Latitude
-        // until |sin(Latitude(iter)-Latitude(iter-1))| < genau
-
-        do {
-            ++$iter;
-
-            $RN = $a / sqrt(1.0 - $es * $SPHI0 * $SPHI0);
-
-            // Ellipsoidal (geodetic) height
-            $height = $P * $CPHI0 + $z * $SPHI0 - $RN * (1.0 - $es * $SPHI0 * $SPHI0);
-
-            $RK = $es * $RN / ($RN + $height);
-            $RX = 1.0 / sqrt(1.0 - $RK * (2.0 - $RK) * $ST * $ST);
-            $CPHI = $ST * (1.0 - $RK) * $RX;
-            $SPHI = $CT * $RX;
-            $SDPHI = $SPHI * $CPHI0 - $CPHI * $SPHI0;
-            $CPHI0 = $CPHI;
-            $SPHI0 = $SPHI;
-        } while ($SDPHI * $SDPHI > $genau2 && $iter < $maxiter);
-
-        // Ellipsoidal (geodetic) latitude
-        $lat = atan($SPHI / abs($CPHI));
+        $lat = atan(($z + $es2 * $Z_0) / $r);
+        $lon = atan2($y, $x);
 
 
         $this->_geodeticTrait = [
             'lat' => rad2deg($lat),
             'lon' => rad2deg($lon),
-            'h' => $height,
+            'h' => $h,
         ];
-
     }
 
     /**

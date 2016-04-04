@@ -6,6 +6,7 @@ namespace Academe\Proj\Coordinates;
 
 use Academe\Proj\Contracts\Coordinate;
 use Academe\Proj\Contracts\Ellipsoid;
+use Academe\Proj\Datum\Datum;
 use Academe\Proj\Traits\DeriveGeocentricTrait;
 
 class GeodeticCoordinate extends AbstractCoordinate implements Coordinate
@@ -33,12 +34,19 @@ class GeodeticCoordinate extends AbstractCoordinate implements Coordinate
      * @param float $lon Longitude
      * @param float $h Height
      */
-    public function __construct($lat, $lon, $h, Ellipsoid $ellipsoid)
+    public function __construct($lat, $lon, $h, Ellipsoid $ellipsoid, Datum $datum)
     {
-        parent::__construct($ellipsoid);
-        $this->lat = $lat;
-        $this->lon = $lon;
-        $this->h = $h;
+        parent::__construct($ellipsoid, $datum);
+        if (abs($lat) > 90) {
+            throw new \OutOfRangeException("Latitude must be between -90 and 90");
+        }
+
+        if (abs($lon) > 180) {
+            throw new \OutOfRangeException("Longitude must be between -90 and 90");
+        }
+        $this->lat = floatval($lat);
+        $this->lon = floatval($lon);
+        $this->h = floatval($h);
     }
 
     public function getLat()

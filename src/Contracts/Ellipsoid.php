@@ -21,7 +21,14 @@ interface Ellipsoid
 
     /**
      * @todo Check data type.
-     * @return float Eccentricity squared
+     * @return float First eccentricity squared
      */
     public function getEs();
+
+
+    /**
+     * @todo Check data type.
+     * @return float Second eccentricity squared
+     */
+    public function getEs2();
 }

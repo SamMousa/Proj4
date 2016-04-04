@@ -3,6 +3,12 @@
 
 namespace Academe\Proj;
 
+use Academe\Proj\Contracts\Ellipsoid;
+use Academe\Proj\Datum\Datum;
+use Academe\Proj\Ellipsoids\ABEllipsoid;
+use Academe\Proj\Ellipsoids\AFEllipsoid;
+use Academe\Proj\Ellipsoids\ARFEllipsoid;
+
 /**
  * This class parses and holds a Proj4 configuration.
  * @package Academe\Proj
@@ -193,7 +199,7 @@ class Proj4Config
      */
     public static function parseIntoArray($string)
     {
-        preg_match_all('/\+(?<key>\w+)=(?<val>.*?)(?:\+|$)/', $string, $matches);
+        preg_match_all('/\+(?<key>\w+)=(?<val>.*?)(?:\ |$)/', $string, $matches);
         $result = [];
         foreach($matches['key'] as $i => $key) {
             $result[$key] = self::convert($matches['val'][$i], $key);
@@ -245,23 +251,32 @@ class Proj4Config
         // This is just to show it is working, obviously it needs refactoring to load this in a more centralized matter.
         $definitions = json_decode(file_get_contents(__DIR__ . '/data/ellipsoids.json'), true);
         if (isset($definitions[$this->ellps])) {
-            return new Ellipsoid($definitions[$this->ellps]);
+            $def = $definitions[$this->ellps];
+            if (isset($def['rf'])) {
+                return new ARFEllipsoid($def['a'], $def['rf']);
+            } elseif (isset($def['b'])) {
+                return new ABEllipsoid($def['a'], $def['b']);
+            }
         } else {
             throw new \Exception("Can't find definition for ellipsoid: $this->ellps");
         }
 
+
+
     }
 
     /**
-     * @return Datum
+     * @return \Academe\Proj\Contracts\Datum
      */
     public function getDatum()
     {
         if (!isset($this->towgs84)) {
             // These 3 are translation parameters, 0 is an identity for translation.
-            return new Datum([0, 0, 0], $this->getEllipsoid());
+            return new Datum();
         } else {
-            return new Datum($this->towgs84, $this->getEllipsoid());
+            // Use reflection
+            $rc = new \ReflectionClass(Datum::class);
+            return $rc->newInstanceArgs($this->towgs84);
         }
     }
 

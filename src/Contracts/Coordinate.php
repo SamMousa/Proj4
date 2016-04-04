@@ -44,5 +44,10 @@ interface Coordinate {
      */
     public function  getEllipsoid();
 
+    /**
+     * @return Datum
+     */
+    public function getDatum();
+
 
 }
