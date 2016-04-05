@@ -8,8 +8,7 @@ interface Ellipsoid
 {
 
     /**
-     * @todo Check data type.
-     * @return float
+     * @return float Length of semi-axis A
      */
     public function getA();
 
@@ -20,14 +19,12 @@ interface Ellipsoid
     public function getB();
 
     /**
-     * @todo Check data type.
      * @return float First eccentricity squared
      */
     public function getEs();
 
 
     /**
-     * @todo Check data type.
      * @return float Second eccentricity squared
      */
     public function getEs2();

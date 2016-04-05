@@ -39,10 +39,10 @@ $datum = $config->getDatum();
 // Negative longitude should have same Z value as positive longitude.
 for ($lon = 0; $lon <= 180; $lon ++) {
     for ($lat = 0; $lat <= 90; $lat++) {
-        $c1 = new GeodeticCoordinate($lat, $lon, 0, $ellipsoid, $datum);
-        $c2 = new GeodeticCoordinate($lat, -$lon, 0, $ellipsoid, $datum);
-        $c3 = new GeodeticCoordinate(-$lat, $lon, 0, $ellipsoid, $datum);
-        $c4 = new GeodeticCoordinate($lat - 10, $lon, 0, $ellipsoid, $datum);
+        $c1 = new GeodeticCoordinate($lon, $lat, 0, $ellipsoid, $datum);
+        $c2 = new GeodeticCoordinate(-$lon, $lat, 0, $ellipsoid, $datum);
+        $c3 = new GeodeticCoordinate($lon, -$lat, 0, $ellipsoid, $datum);
+        $c4 = new GeodeticCoordinate($lon, $lat - 10, 0, $ellipsoid, $datum);
 
         if (!($c1->getZ() === $c2->getZ())) {
             throw new \Exception("Same absolute longitude should have same Z value.");
@@ -54,7 +54,7 @@ for ($lon = 0; $lon <= 180; $lon ++) {
 
 
         // Geodetic to geocentric conversion test.
-        $geodetic = new GeodeticCoordinate($lat, $lon, 0, $ellipsoid, $datum);
+        $geodetic = new GeodeticCoordinate($lon, $lat, 0, $ellipsoid, $datum);
         $geocentric = new \Academe\Proj\Coordinates\GeocentricCoordinate($geodetic->getX(), $geodetic->getY(), $geodetic->getZ(), $ellipsoid, $datum);
 
         $eps = 0.001;
@@ -71,11 +71,14 @@ $projected = \Academe\Proj\Transformations\Helmert::transform($c, new \Academe\P
 
 echo "{$projected->getLat()}, {$projected->getLon()}\n";
 
-$c =  new GeodeticCoordinate(53.2965173451, 6.60650455549, 1, $WGS84, new \Academe\Proj\Datum\Datum());
+$c =  new GeodeticCoordinate(6.60650455549, 53.2965173451, 1, $WGS84, new \Academe\Proj\Datum\Datum());
 
-$proj = new \Academe\Proj\Projection\Sterea(52.15616055555555, 0.9999079, 155000, 463000, 5.38763888888889, $datum, $ellipsoid);
+$proj = new \Academe\Proj\Projection\Sterea(52.15616055555555, 0.9999079, 155000, 463000, 5.38763888888889, $ellipsoid->getEs(), $ellipsoid->getA());
 //$proj = new \Academe\Proj\Projection\Gauss(52.15616055555555, 0.9999079, 155000, 463000, 5.38763888888889, $datum, $ellipsoid);
-var_dump(array_map('rad2deg', $proj->inverse(236296.709, 590744.631)));
+list($lon, $lat) = array_map('rad2deg', $proj->inverse(236296.709, 590744.631));
+
+$result = \Academe\Proj\Transformations\Helmert::transform(new GeodeticCoordinate($lon, $lat, 1, $ellipsoid, $datum), new \Academe\Proj\Datum\Datum());
+var_dump($result->getLon(), $result->getLat());
 die('ok');
 //$c =  new \Academe\Proj\Coordinates\GeocentricCoordinate(3786461.411817, 5079283.3397545, 728854.25060513, $ellipsoid, new \Academe\Proj\Datum\Datum());
 //$c = new GeodeticCoordinate(90, 0, 0, $ellipsoid, new \Academe\Proj\Datum\Datum());

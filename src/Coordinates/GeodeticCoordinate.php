@@ -34,7 +34,7 @@ class GeodeticCoordinate extends AbstractCoordinate implements Coordinate
      * @param float $lon Longitude
      * @param float $h Height
      */
-    public function __construct($lat, $lon, $h, Ellipsoid $ellipsoid, Datum $datum)
+    public function __construct($lon, $lat, $h, Ellipsoid $ellipsoid, Datum $datum)
     {
         parent::__construct($ellipsoid, $datum);
         if (abs($lat) > 90) {
