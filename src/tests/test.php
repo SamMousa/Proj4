@@ -66,33 +66,34 @@ for ($lon = 0; $lon <= 180; $lon ++) {
 }
 
 $WGS84 = new \Academe\Proj\Ellipsoids\ARFEllipsoid(6378137, 298.257223563);
-$c = new \Academe\Proj\Coordinates\GeocentricCoordinate(81295.183, 127755.315, 1, $ellipsoid, $datum);
-$projected = \Academe\Proj\Transformations\Helmert::transform($c, new \Academe\Proj\Datum\Datum());
 
-echo "{$projected->getLat()}, {$projected->getLon()}\n";
 
-$c =  new GeodeticCoordinate(6.60650455549, 53.2965173451, 1, $WGS84, new \Academe\Proj\Datum\Datum());
+$c =  new GeodeticCoordinate(6.60650455549, 53.2969942548, 1, $WGS84, new \Academe\Proj\Datum\Datum());
 
 $proj = new \Academe\Proj\Projection\Sterea(52.15616055555555, 0.9999079, 155000, 463000, 5.38763888888889, $ellipsoid->getEs(), $ellipsoid->getA());
-//$proj = new \Academe\Proj\Projection\Gauss(52.15616055555555, 0.9999079, 155000, 463000, 5.38763888888889, $datum, $ellipsoid);
-list($lon, $lat) = array_map('rad2deg', $proj->inverse(236296.709, 590744.631));
 
+list($lon, $lat) = array_map('rad2deg', $proj->inverse(236296.709, 590744.631));
 $result = \Academe\Proj\Transformations\Helmert::transform(new GeodeticCoordinate($lon, $lat, 1, $ellipsoid, $datum), new \Academe\Proj\Datum\Datum());
-var_dump($result->getLon(), $result->getLat());
-die('ok');
+$c = new GeodeticCoordinate($lon, $lat, 1, $ellipsoid, $datum);
+var_dump([$c->getX(), $c->getY(), $c->getZ()]);
+var_dump([
+    'x' => $c->getX(),
+    'y' => $c->getY(),
+    'z' => $c->getZ(),
+    'lon' => $c->getLon(),
+    'lat' => $c->getLat(),
+]);
+$c = $result;
+echo json_encode($c, JSON_PRETTY_PRINT);
+
+
+//var_dump($result->getLon(), $result->getLat());
+//die('ok');
 //$c =  new \Academe\Proj\Coordinates\GeocentricCoordinate(3786461.411817, 5079283.3397545, 728854.25060513, $ellipsoid, new \Academe\Proj\Datum\Datum());
 //$c = new GeodeticCoordinate(90, 0, 0, $ellipsoid, new \Academe\Proj\Datum\Datum());
-var_dump($ellipsoid->getEs2());
-var_dump($datum);
-var_dump($c->getLat());
-var_dump($c->getLon());
 
-var_dump($c->getH());
-var_dump($c->getX());
-var_dump($c->getY());
-var_dump($c->getZ());
-die();
-$test = new GeodeticCoordinate($c->getLat(), $c->getLon(), $c->getH(), $ellipsoid, $datum);
+$cmd = "echo $lon $lat | cs2cs -f '%.10f' +ellps=WGS84 +proj=longlat +towgs84=565.417,50.3319,465.552,-0.398957,0.343988,-1.8774,4.0725 +to +proj=longlat +datum=WGS84";
+passthru($cmd);
 die();
 
 

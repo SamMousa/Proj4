@@ -6,7 +6,7 @@ use Academe\Proj\Contracts\Coordinate;
 use Academe\Proj\Contracts\Datum;
 use Academe\Proj\Contracts\Ellipsoid;
 
-abstract class AbstractCoordinate implements Coordinate
+abstract class AbstractCoordinate implements Coordinate, \JsonSerializable
 {
     private $ellipsoid;
     private $datum;
@@ -25,6 +25,19 @@ abstract class AbstractCoordinate implements Coordinate
     public function getDatum()
     {
         return $this->datum;
+    }
+
+
+
+    public function jsonSerialize()
+    {
+        return [
+            'x' => $this->getX(),
+            'y' => $this->getY(),
+            'z' => $this->getZ(),
+            'lon' => $this->getLon(),
+            'lat' => $this->getLat(),
+        ];
     }
 
 }

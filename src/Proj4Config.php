@@ -275,8 +275,8 @@ class Proj4Config
             return new Datum();
         } else {
             // Use reflection
-            $rc = new \ReflectionClass(Datum::class);
-            return $rc->newInstanceArgs($this->towgs84);
+            $result = (new \ReflectionClass(Datum::class))->newInstanceArgs($this->towgs84);
+            return $result ;
         }
     }
 
