@@ -27,7 +27,12 @@ class ARFEllipsoid implements \Academe\Proj\Contracts\Ellipsoid
     private $a;
     private $rf;
 
-    public function __construct($a, $rf)
+    /**
+     * ARFEllipsoid constructor.
+     * @param float $a Defaults to WGS84
+     * @param float $rf Defaults to WGS84
+     */
+    public function __construct($a = 6378137, $rf = 298.257223563)
     {
         $this->a = $a;
         $this->rf = $rf;

@@ -31,9 +31,9 @@ class GeocentricCoordinate extends AbstractCoordinate implements Coordinate
 
     /**
      * GeodeticCoordinate constructor.
-     * @param float $lat Latitude
-     * @param float $lon Longitude
-     * @param float $h Height
+     * @param float $x
+     * @param float $y
+     * @param float $z
      */
     public function __construct($x, $y, $z, Ellipsoid $ellipsoid, Datum $datum)
     {

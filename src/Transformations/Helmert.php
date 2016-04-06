@@ -25,7 +25,7 @@ class Helmert
 
         list($x, $y, $z) = static::applyTransformation(
             $c->getDatum()->getTranslateX(), $c->getDatum()->getTranslateY(), $c->getDatum()->getTranslateZ(),
-            $c->getDatum()->getRotateX(), -$c->getDatum()->getRotateY(), $c->getDatum()->getRotateZ(),
+            $c->getDatum()->getRotateX(), $c->getDatum()->getRotateY(), $c->getDatum()->getRotateZ(),
             $c->getDatum()->getScale(),
             $c->getX(), $c->getY(), $c->getZ()
         );
@@ -58,9 +58,10 @@ class Helmert
         $r_x = deg2rad($r_x);
         $r_y = deg2rad($r_y);
         $r_z = deg2rad($r_z);
-        $x_b = $c_x + $scale * ($x_a - $r_x * $y_a + $r_y * $z_a);
-        $y_b = $c_y + $scale * ($r_z * $x_a + $y_a - $r_x * $z_a);
-        $z_b = $c_z + $scale * (-1 * $r_y * $x_a + $r_x * $y_a + $z_a);
+        $x_b = $c_x + $scale * ($x_a  -        $r_z * $y_a + $r_y * $z_a);
+        $y_b = $c_y + $scale * ($r_z  * $x_a +        $y_a - $r_x * $z_a);
+        $z_b = $c_z + $scale * (-$r_y * $x_a + $r_x * $y_a +        $z_a);
+
 
         return [$x_b, $y_b, $z_b];
     }
